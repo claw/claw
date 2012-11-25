@@ -1,2 +1,0 @@
-(ns claw.boot)
-

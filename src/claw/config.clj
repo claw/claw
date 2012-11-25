@@ -1,6 +1,6 @@
 (ns claw.config
-  (:use [environ.core]
-        ))
+  (:refer-clojure :exclude [get])
+  (:use [environ.core]))
 
 ;; Set overrides in your ~/.lein/profiles.clj for development mode.
 
@@ -70,7 +70,7 @@ Any unknown value is ignored and puts the app into dev mode.
         "dev" :dev
         :dev)) ;; TODO: log an error on unknown values
 
-(defn config
+(defn get
   "Returns the current configuration value for the given key.
 
 If an environment variable is set named key, config returns that value.

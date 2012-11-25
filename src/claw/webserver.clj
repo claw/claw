@@ -7,11 +7,10 @@
    
    noir.core
    noir.fetch.remotes
-   claw.config
    ring.middleware.http-basic-auth)
   
   (:require
-   
+   [claw.config :as config]
    [noir.response :as response]
    [noir.server :as nr-server]
 
@@ -35,15 +34,15 @@ before Noir starts."
 
   (logger/set-default-root-logger!) ;; Set the entire app to log to the same Ring middleware log
   
-  (log/info (ansi/style (str " ****** " (config :app-name)
-                             " v " (trptcolin.versioneer.core/get-version  (config :maven-group-name)
-                                                                           (config :maven-artifact-name)
+  (log/info (ansi/style (str " ****** " (config/get :app-name)
+                             " v " (trptcolin.versioneer.core/get-version  (config/get :maven-group-name)
+                                                                           (config/get :maven-artifact-name)
                                                                            "<set :maven-artifact-name and :maven-group-name configs to autodetect version number>")
                              " (Claw v" (System/getProperty "claw.version") ") starting up...")
                         :bright :white))
   ;;(log/log-capture! (str *ns*)) ;; capture stdout / stderr to log to current namespace
 
-  (if (config :show-web-stacktraces)
+  (if (config/get :show-web-stacktraces)
     ;; Sends helpful HTML stacktraces on exceptions, rather than
     ;; crashing with a silent 500 response.
     (nr-server/add-middleware stacktrace/wrap-stacktrace-web))
@@ -51,7 +50,7 @@ before Noir starts."
   ;; Allow users to request JSONP from any JSON-generating response
   (nr-server/add-middleware jsonp/wrap-json-with-padding)
 
-  (if (config :auto-reload)
+  (if (config/get :auto-reload)
        (nr-server/add-middleware ring.middleware.reload/wrap-reload)))
 
 (defonce pre-noir-setup (pre-noir-functions))
@@ -75,8 +74,8 @@ before Noir starts."
      (start-noir-server )
      )
   ([]
-      (let [mode (keyword (or (config :mode) (or (first mode) :dev)))
-            port (Integer. (or (config :web-port) "3000"))
+      (let [mode (keyword (or (config/get :mode) (or (first mode) :dev)))
+            port (Integer. (or (config/get :web-port) "3000"))
             ]
         
         )))
@@ -89,10 +88,6 @@ before Noir starts."
 (defn stop-server [server]
   (nr-server/stop server))
 
-(defn start-nrepl-server []
-  (let [port (Integer. (or (config :nrepl-port) "7888"))]
-    (log/info (str "* Starting nREPL server on port " port "."))
-    (nrepl/start-server :port port)))
 
 (defn -main [& mode]
   (defonce nrepl-server (start-nrepl-server))
