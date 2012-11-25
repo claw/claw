@@ -8,8 +8,8 @@
                  ;; Ring extensions
                  [ring.middleware.logger "0.2.3-SNAPSHOT"]
                  [org.clojars.pepijndevos/ring-http-basic-auth "0.1.1"]
-                 [org.clojars.pjlegato/ring.middleware.jsonp "0.1.1-SNAPSHOT"]
-                 [com.cemerick/friend "0.1.2"]
+                 [ring.middleware.jsonp "0.1.1"] ;; auto-generate JSONP from any JSON response
+                 [com.cemerick/friend "0.1.2"] ;; Authentication
                  
                  ;; Database
                  [korma "0.3.0-beta9"]
@@ -26,7 +26,8 @@
                  [fs "1.0.0"] ;; Filesystem utils
                  [slingshot "0.10.2"] ;; Enhanced throw/catch
                  [org.clojure/tools.nrepl "0.2.0-beta8"] ;; Network REPL
-
+                 [trptcolin/versioneer "0.1.0"] ;; Reads versions from Maven / system properties
+                 
 
                  ]
   )
