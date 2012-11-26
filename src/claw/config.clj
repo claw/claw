@@ -40,6 +40,8 @@ settings are overridden for e.g. dev mode.
    ;;;;;;;;;;;;;;;;;;;;;;;
    :show-web-stacktraces false
    :auto-reload false ;; Adds ring.middleware.reload if true.
+   :web-port "3000"
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;
    ;;
@@ -54,7 +56,8 @@ settings are overridden for e.g. dev mode.
    ;; include the plugins you need.
    ;;
    :claw-internal-plugins '[claw.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
-                            claw.nrepl/nrepl-plugin]
+                            claw.nrepl/nrepl-plugin
+                            claw.webserver/webserver-plugin]
    
    ;;
    ;; App-level user-provided plugins should be added to :claw-plugins.
@@ -71,7 +74,6 @@ settings are overridden for e.g. dev mode.
    :dev (merge default-configuration
                {
                 :mode "dev"
-                :web-port "3000"
                 
                 :database-name "claw-development"
                 :database-user "claw-development"

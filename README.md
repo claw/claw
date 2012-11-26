@@ -19,6 +19,10 @@ Currently implemented:
 * Korma integration
 * Default error messages
 * Default welcome page
+* Auto-color all warnings yellow and all errors red in logs
+* Easy-add HTTP Basic auth
+* SSL
+* Graceful shutdown on SIGTERM
 * Lots of other stuff
 
 ## License
