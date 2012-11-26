@@ -26,8 +26,8 @@
                  [fs "1.0.0"] ;; Filesystem utils
                  [slingshot "0.10.2"] ;; Enhanced throw/catch
                  [org.clojure/tools.nrepl "0.2.0-beta8"] ;; Network REPL
-                 [trptcolin/versioneer "0.1.0"] ;; Reads versions from Maven / system properties
-                 
-
+                 [trptcolin/versioneer "0.1.0"] ;; Reads versions from Maven / system properties                 
+                 [cheshire "5.0.0"] ;; JSON
                  ]
+  :main claw.core
   )

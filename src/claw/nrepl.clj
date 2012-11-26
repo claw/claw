@@ -12,7 +12,7 @@
 (defn start-nrepl-server!
   "Starts a nREPL server on the given port, on the configured port, or on port 7888 if none is configured.
    Does nothing if there is already an nREPL running on that port."
-  ([] (start-nrepl-server nil))
+  ([] (start-nrepl-server! nil))
   ([port]
      (let [port (Integer. (or port (config/get :nrepl-port) "7888"))]
        (if (contains? @nrepls port)

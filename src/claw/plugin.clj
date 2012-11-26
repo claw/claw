@@ -138,3 +138,4 @@
   "Stops the given plugin with the given arguments. Does not remove it from the registry"
   [plugin & args]
   (stop! plugin args))
+
