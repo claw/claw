@@ -33,11 +33,18 @@
    ;;
    ;;;;;;;;;;;;;;;;;;;;;;;
 
-   ;; Plugins used internally by Claw itself
+   ;;
+   ;; Plugins used internally by Claw itself. The default plugin set
+   ;; gives you a reasonable full-stack web framework.  If you want to
+   ;; make a leaner app, just override this in your config, and only
+   ;; include the plugins you need.
+   ;;
    :claw-internal-plugins '[claw.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
                             claw.nrepl/nrepl-plugin]
    
+   ;;
    ;; App-level user-provided plugins should be added to :claw-plugins.
+   ;;
    :claw-plugins '[] 
 
    }
