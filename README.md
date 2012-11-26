@@ -14,8 +14,12 @@ Sometimes, you want to assemble a custom stack from components. Other times, you
 
 Currently implemented:
 
-Todo:
-
+## TODO:
+* Tests
+* Korma integration
+* Default error messages
+* Default welcome page
+* Lots of other stuff
 
 ## License
 
