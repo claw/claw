@@ -32,15 +32,6 @@ before Noir starts."
   ;; Logs all requests:
   (nr-server/add-middleware logger/wrap-with-logger)
 
-  (logger/set-default-root-logger!) ;; Set the entire app to log to the same Ring middleware log
-  
-  (log/info (ansi/style (str " ****** " (config/get :app-name)
-                             " v " (trptcolin.versioneer.core/get-version  (config/get :maven-group-name)
-                                                                           (config/get :maven-artifact-name)
-                                                                           "<set :maven-artifact-name and :maven-group-name configs to autodetect version number>")
-                             " (Claw v" (System/getProperty "claw.version") ") starting up...")
-                        :bright :white))
-  ;;(log/log-capture! (str *ns*)) ;; capture stdout / stderr to log to current namespace
 
   (if (config/get :show-web-stacktraces)
     ;; Sends helpful HTML stacktraces on exceptions, rather than
