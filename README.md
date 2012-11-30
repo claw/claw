@@ -23,6 +23,8 @@ Currently implemented:
 * Easy-add HTTP Basic auth
 * SSL
 * Graceful shutdown on SIGTERM
+* Authentication
+* Admin console
 * Lots of other stuff
 
 ## License
