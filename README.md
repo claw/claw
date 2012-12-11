@@ -1,4 +1,4 @@
-# claw: Clojure All-in-one Webstack
+# Claw: Clojure All-in-one Webstack
 
 ## Work-in-progress. Please get in touch if you'd like to help!
 
@@ -15,10 +15,12 @@ Sometimes, you want to assemble a custom stack from components. Other times, you
 Currently implemented:
 
 ## TODO:
-* Tests
+* Automated tests
 * Korma integration
+* ClojureQL integration
+* Database migrations
 * Default error messages
-* Default welcome page
+* Better default welcome page
 * Auto-color all warnings yellow and all errors red in logs
 * Easy-add HTTP Basic auth
 * SSL
