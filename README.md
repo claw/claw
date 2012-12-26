@@ -14,8 +14,16 @@ Sometimes, you want to assemble a custom stack from components. Other times, you
 
 Currently implemented:
 
+* Noir, Hiccup, Enlive
+* Logging
+* nREPL
+* Generic configuration framework with sane defaults provided; everything works out of the box with zero configuration (but you can override all settings if you like)
+* Basic plugin lifecycle management framework; everything is a modular
+  plugin
+  
 ## TODO:
 * Automated tests
+* Change Noir to libnoir
 * Korma integration
 * ClojureQL integration
 * Database migrations
