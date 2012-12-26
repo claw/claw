@@ -1,4 +1,4 @@
-(defproject claw "0.1.0-SNAPSHOT"
+(defproject claw "0.2.0-SNAPSHOT"
   :description "Claw is a full stack, monolithic web framework for Clojure."
   :url "http://github.com/pjlegato/claw"
   :license {:name "Eclipse Public License"
@@ -15,8 +15,12 @@
                  [korma "0.3.0-beta9"]
                  [postgresql "9.1-901.jdbc4"]
 
-                 ;; Noir web framework
-                 [noir "1.3.0-beta10"]
+                 ;; Web
+                 [ring "1.1.6"]
+                 [compojure "1.1.3"]  ;; Routes
+                 [ring-serve "0.1.2"] ;; Easily start and stop the webserver
+                 [hiccup "1.0.2"]     ;; Render HTML from Clojure
+
 
                  ;; General purpose utilities
                  [clj-time "0.4.2"]

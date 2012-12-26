@@ -35,6 +35,9 @@ Currently implemented:
 * Graceful shutdown on SIGTERM
 * Authentication with Friend
 * Admin console
+* OAuth
+* Easy ClojureScript reactive programming (e.g. along the lines of
+  http://dev.clojure.org/display/design/Reactive+Programming and https://groups.google.com/forum/#!topic/clojure-dev/LzVu4dIvOrg)
 * Lots of other stuff
 
 ## License
