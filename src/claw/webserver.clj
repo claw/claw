@@ -24,6 +24,16 @@
    ))
 
 
+(defn- add-default-routes!
+  "Adds the default Claw root landing page, if the user app hasn't set one.
+
+Note that you use normal Noir methods to set up your routes. For example,
+call (noir.statuses/set-page!) to set a different 404 error page.
+
+TODO: Prettier landing page.
+"
+  []
+  (defpage "/" [] (hiccup.core/html [:h1 "Welcome to " [:a {:href "https://github.com/pjlegato/claw"} "Claw"] "!"])))
 
 (defn- pre-noir-functions  []
   "Tasks that should be performed exactly once at app boot time,
@@ -44,7 +54,7 @@ before Noir starts."
     (nr-server/add-middleware ring.middleware.reload/wrap-reload))
 
   (nr-server/load-views "src/claw/web/views/")
-  (defpage "/" [] (noir.response/redirect "/names")))
+  (add-default-routes!))
 
 
 

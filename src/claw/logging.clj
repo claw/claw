@@ -8,12 +8,23 @@
    [trptcolin.versioneer.core :as versioneer]
    [ring.middleware.logger :as logger]))
 
+(defn- log-uncaught-exceptions!
+  "Causes the logger to catch all uncaught exceptions and log them to
+  the default logfile."
+  []
+  (Thread/setDefaultUncaughtExceptionHandler
+   (reify Thread$UncaughtExceptionHandler
+     (uncaughtException [this thread throwable]
+       (log/error (ansi/style "Uncaught Exception!" :bright :red))
+       (log/error throwable)))))
+
 (defn start-logger!
   "Sets up default app-wide logging."
   []
   (logger/set-default-logger!)
   (logger/set-default-root-logger!) ;; Set the entire app to log to the same Ring middleware log
 
+  (log-uncaught-exceptions!)
   ;;(log/log-capture! (str *ns*)) ;; capture stdout / stderr to log to current namespace
 
   ;; Note: 'app' here refers to the user-level app using Claw, not to claw itself.

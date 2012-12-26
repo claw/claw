@@ -17,19 +17,28 @@ logging system being unconfigured to the console."
   (if (find-ns 'claw.logging)
     (log/info  " * Loading plugin"  (ansi/style plugin-symbol :cyan :bright)  "...")))
 
+(defn- start-plugin!
+  "Loads the given plugin's namespace with require, and starts the
+  single given namespaced plugin with claw.plugin/start-plugin!."
+  [plugin-symbol]
+  (let [nspace (symbol (namespace plugin-symbol))]
+    (require nspace)
+    (claw.plugin/start-plugin! (var-get (resolve plugin-symbol)))))
 
-(defn- start-all-plugins!
+(defn- start-plugins!
   "Given a list of namespace-qualified symbols, requires all namespaces and loads the specified plugins."
   [plugins]
   (dorun (map
           (fn [plugin-symbol]
-            (let [nspace (symbol (namespace plugin-symbol))]
-
-              (log-plugin-load! plugin-symbol)
-              
-              (require nspace)
-              (claw.plugin/start-plugin! (var-get (resolve plugin-symbol)))))
+            (log-plugin-load! plugin-symbol)
+            (start-plugin! plugin-symbol))
           plugins)))
+
+(defn start-all-plugins!
+  "Starts all plugins in configuration order. (Intended for interactive development use at a REPL, and from (-main).)"
+  []
+  (start-plugins! (config/get :claw-internal-plugins))
+  (start-plugins! (config/get :claw-plugins)))
 
 (defn -main
   "Main framework entry point."
@@ -38,9 +47,7 @@ logging system being unconfigured to the console."
   (println (ansi/style (str "Claw v" (System/getProperty "claw.version") " starting up...") :white :bright) "\n"
            "Copyright (C) 2012 Paul Legato. Distributed under the Eclipse Public License.\n")
   
-  ;; Start all plugins in configuration order:
-  (start-all-plugins! (config/get :claw-internal-plugins))
-  (start-all-plugins! (config/get :claw-plugins))
+  (start-all-plugins!)
   
   (println
    "\nStartup complete!\n"

@@ -25,7 +25,7 @@ Currently implemented:
 * Easy-add HTTP Basic auth
 * SSL
 * Graceful shutdown on SIGTERM
-* Authentication
+* Authentication with Friend
 * Admin console
 * Lots of other stuff
 
