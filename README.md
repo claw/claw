@@ -14,7 +14,7 @@ Sometimes, you want to assemble a custom stack from components. Other times, you
 
 Currently implemented:
 
-* Noir, Hiccup, Enlive
+* Compojure, Hiccup, Enlive
 * Logging
 * nREPL
 * Generic configuration framework with sane defaults provided; everything works out of the box with zero configuration (but you can override all settings if you like)
@@ -23,7 +23,7 @@ Currently implemented:
   
 ## TODO:
 * Automated tests
-* Change Noir to libnoir
+* Add libnoir
 * Korma integration
 * ClojureQL integration
 * Database migrations
