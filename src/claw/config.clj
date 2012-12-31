@@ -1,4 +1,9 @@
 (ns claw.config
+  "Global Claw app config.
+
+Note that configured references to other namespaces must be quoted so
+that they don't have to be already loaded when config.clj loads.
+"
   (:refer-clojure :exclude [get])
   (:require [cheshire.core :as json])
   (:use [environ.core]))
@@ -23,7 +28,7 @@ settings are overridden for e.g. dev mode.
    :maven-artifact-name nil
    :maven-group-name nil
 
-   :nrepl-port "7888"
+   :nrepl-port "9999"
 
    ;;;;;;;;;;;;;;;;;;;;;;;
    ;;
@@ -38,10 +43,11 @@ settings are overridden for e.g. dev mode.
    ;; Web configuration
    ;;
    ;;;;;;;;;;;;;;;;;;;;;;;
-   :show-web-stacktraces false
-   :auto-reload false ;; Adds ring.middleware.reload if true.
    :web-port "3000"
-
+   :global-middleware ['ring.middleware.logger/wrap-with-logger
+                       'ring.middleware.jsonp/wrap-json-with-padding
+                       ]
+   :middleware [] ;; Allows modes to add additional mode-specific middleware without overwriting the globals.
 
    ;;;;;;;;;;;;;;;;;;;;;;;
    ;;
@@ -55,9 +61,9 @@ settings are overridden for e.g. dev mode.
    ;; make a leaner app, just override this in your config, and only
    ;; include the plugins you need.
    ;;
-   :claw-internal-plugins '[claw.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
-                            claw.nrepl/nrepl-plugin
-                            claw.webserver/webserver-plugin]
+   :claw-internal-plugins ['claw.plugins.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
+                           'claw.plugins.nrepl/nrepl-plugin
+                           'claw.plugins.webserver/webserver-plugin]
    
    ;;
    ;; App-level user-provided plugins should be added to :claw-plugins.
@@ -79,8 +85,8 @@ settings are overridden for e.g. dev mode.
                 :database-user "claw-development"
                 :database-password ""
                 
-                :show-web-stacktraces true
-                :auto-reload true
+                :middleware ['ring.middleware.stacktrace/wrap-stacktrace-web
+                             'ring.middleware.reload/wrap-reload]
                 
                 })
    
@@ -129,3 +135,19 @@ If all of the above fail, the default provided is used.
            (try (json/parse-string val)
                 (catch com.fasterxml.jackson.core.JsonParseException e val)))
          ((mode mode-defaults) key))))
+
+(defn get-unquoted
+  "Uses config/get to get a sequence of symbolic name and unquotes them,
+  returning the sequence of concretized vars that results. It tries to
+  load any namespaces referenced.
+
+TODO: Throw better errors than the default here, to catch typos in the
+config. Give users a friendly error message suggesting that they check
+their config for typos, and make sure that all required files have been
+loaded.
+
+"
+  [key]
+  (map (fn [sym]
+         (require (symbol (namespace sym)))
+         (var-get (find-var sym))) (claw.config/get key)))

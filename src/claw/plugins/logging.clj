@@ -1,4 +1,4 @@
-(ns claw.logging
+(ns claw.plugins.logging
   "Plugin to initialize the logging system."
   (:require
    [claw.config :as config]

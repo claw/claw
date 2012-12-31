@@ -1,4 +1,4 @@
-(ns claw.nrepl
+(ns claw.plugins.nrepl
   "Claw plugin which starts a nREPL."
   (:require
    [claw.config :as config]
