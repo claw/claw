@@ -16,6 +16,7 @@
    [compojure.handler :as handler]
    [compojure.response :as response]
 
+   [hiccup.core]
    [hiccup.middleware]
    
    [ring.adapter.jetty :as jetty]
@@ -62,7 +63,9 @@ TODO: Facilities for wrapping different routes with different middleware.
 (defn start-server!
   "Starts a new webserver on the default port and saves it in the 'webserver' atom, unless one is already running.
 
-TODO: Expand to allow secondary servers on other ports?"
+TODO: Expand to allow secondary servers on other ports?
+TODO: Option to automatically try different ports if this port is in use
+"
   []
   (if-let [server @webserver]
     (if (.isRunning server)
@@ -71,7 +74,8 @@ TODO: Expand to allow secondary servers on other ports?"
     (swap! webserver
            (fn [_]
              (let [port (Integer. (config/get :web-port "3000"))]
-               (log/info (ansi/style (str " - Starting webserver on port " port) :bright :cyan))
+               (println (ansi/style (str "   - Starting webserver on port " port) :bright :green))
+               (log/info (ansi/style (str " - Starting webserver on port " port) :bright :green))
                (new-web-server port))))))
 
 

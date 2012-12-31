@@ -61,9 +61,9 @@ settings are overridden for e.g. dev mode.
    ;; make a leaner app, just override this in your config, and only
    ;; include the plugins you need.
    ;;
-   :claw-internal-plugins ['claw.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
-                           'claw.nrepl/nrepl-plugin
-                           'claw.plugins.compojure/compojure-plugin]
+   :claw-internal-plugins ['claw.plugins.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
+                           'claw.plugins.nrepl/nrepl-plugin
+                           'claw.plugins.webserver/webserver-plugin]
    
    ;;
    ;; App-level user-provided plugins should be added to :claw-plugins.
