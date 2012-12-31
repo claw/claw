@@ -52,7 +52,7 @@
 ;;
 
 (defprotocol Plugin
-  "Methods to manage the lifecycle of a plugin."
+  "Methods to manage the lifecycle of a generic plugin."
 
   (name [plugin] "Returns the plugin's name.")
   (state [plugin] "Returns the plugin's current state.")
@@ -138,4 +138,5 @@
   "Stops the given plugin with the given arguments. Does not remove it from the registry"
   [plugin & args]
   (stop! plugin args))
+
 

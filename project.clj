@@ -5,6 +5,11 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
 
+                 ;; TODO: Break out plugins into subprojects, so that
+                 ;; you don't need to have dependencies around that
+                 ;; are only needed for plugins you aren't actually
+                 ;; using.
+                 
                  ;; Ring extensions
                  [ring.middleware.logger "0.2.3-SNAPSHOT"]
                  [org.clojars.pepijndevos/ring-http-basic-auth "0.1.1"]
