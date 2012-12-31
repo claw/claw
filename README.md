@@ -32,7 +32,11 @@ Currently implemented:
 * Auto-color all warnings yellow and all errors red in logs
 * Easy-add HTTP Basic auth
 * SSL
-* Graceful shutdown on SIGTERM
+* Generate / manage robots.txt
+* Generate a sitemap
+* Hold a route / middleware interaction graph in memory, allow it to
+  be dynamically updated, auto-change / set up everything when it is
+* Graceful, logged shutdown on SIGTERM
 * Authentication with Friend
 * Admin console
 * OAuth
