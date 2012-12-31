@@ -29,7 +29,11 @@ Currently implemented:
 * Database migrations
 * Default error messages
 * Better default welcome page
+* Separate webserver plugin into "webserver" and "Compojure" plugins;
+  add Moustache plugin
 * Auto-color all warnings yellow and all errors red in logs
+* Full cycle reactive AJAX auto-form validation, including Clojurescript
+  feedback for wrong form fields
 * Easy-add HTTP Basic auth
 * SSL
 * Generate / manage robots.txt
@@ -39,10 +43,16 @@ Currently implemented:
 * Graceful, logged shutdown on SIGTERM
 * Authentication with Friend
 * Admin console
-* OAuth
+* REST: The SQL equivalent of Ringfinger? Something else?
+* Invitations via e-mail
+* e-mail validation
 * Easy ClojureScript reactive programming (e.g. along the lines of
-  http://dev.clojure.org/display/design/Reactive+Programming and https://groups.google.com/forum/#!topic/clojure-dev/LzVu4dIvOrg)
-* Lots of other stuff
+  http://dev.clojure.org/display/design/Reactive+Programming and
+  https://groups.google.com/forum/#!topic/clojure-dev/LzVu4dIvOrg)
+* Config in middleware? http://brehaut.net/blog/2012/configuration_middleware
+* Lots of other stuff.. 
+
+What do you want to see Claw do?
 
 ## License
 
