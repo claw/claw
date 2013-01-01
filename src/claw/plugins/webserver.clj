@@ -24,18 +24,15 @@
 
 
 (def default-routes
-  "Adds the default Claw root landing page, if the user app hasn't set one.
+  "Route to the default Claw root landing page and 404 page.
 
-TODO: Prettier landing page.
+TODO: Prettier landing page and 404 page.
 "
 
   (defroutes app
     (GET "/" [] (hiccup.core/html [:h1 "Welcome to " [:a {:href "https://github.com/pjlegato/claw"} "Claw"] "!"]))
     (route/not-found "<h1>Page not found</h1>")))
 
-
-(defn- maybe
-  )
 
 (defn- default-middleware
   []
