@@ -28,7 +28,9 @@
   created by individual plugins at runtime.
   
 "
-    (:refer-clojure :exclude [name]))
+  (:require [clansi.core :as ansi]
+            [clojure.tools.logging :as log])
+  (:refer-clojure :exclude [name]))
 
 
 
@@ -50,7 +52,10 @@
 ;; e.g. a Postgres plugin that allows simultaneous connection to
 ;; multiple databases.
 ;;
-
+;; TODO: Can this be done more cleanly by using Robert Hooke to
+;; decorate functions with state registration hooks, rather than with
+;; this wrapper protocol?
+;;
 (defprotocol Plugin
   "Methods to manage the lifecycle of a generic plugin."
 
@@ -129,7 +134,11 @@
   (swap! plugins dissoc (name plugin)))
 
 (defn start-plugin!
-  "Starts the given plugin with the given arguments, saving it in the global plugin registry under its name if necessary."
+  "Starts the given plugin with the given arguments, requiring its
+  namespace and saving it in the global plugin registry under its name
+  if necessary.
+  Logs any exceptions.
+"
   [plugin & args]
   (register-plugin! plugin)
   (start! plugin args))
@@ -139,4 +148,40 @@
   [plugin & args]
   (stop! plugin args))
 
+
+(defn- log-plugin-load!
+  "Logs an info message noting that the specified plugin has been
+loaded, and prints a similar message to the console, to aid debugging
+in cases where the logging plugin itself hasn't loaded yet.
+
+ Will not try to log anything unless the claw.logging namespace has
+been loaded, to avoid causing Log4J to print warning spam about the
+logging system being unconfigured to the console.
+"
+  [plugin-symbol]
+  (println  " * Loading plugin"  (ansi/style plugin-symbol :cyan :bright)  "...")
+  (if (find-ns 'claw.plugins.logging)
+    (log/info  " * Loading plugin"  (ansi/style plugin-symbol :cyan :bright)  "...")))
+
+(defn- log-plugin-exception!
+  "Logs an exception that occurred loading a plugin according to the
+  same semantics as log-plugin-load! (cf.)
+
+TODO: print / log stack traces"
+  [plugin-symbol exception]
+  (println   (ansi/style (str "  -- Error loading plugin " plugin-symbol ": " (.getMessage exception)) :red :bright))
+  (if (find-ns 'claw.plugins.logging)
+    (log/error   (ansi/style (str "  -- Error loading plugin " plugin-symbol ": " (.getMessage exception)) :red :bright))))
+
+(defn start-plugin-by-symbol!
+  "Loads the given symbol's namespace and then starts the plugin, logging any errors."
+  [plugin-symbol]
+  (log-plugin-load! plugin-symbol)
+  (try
+    (let [nspace (symbol (namespace plugin-symbol))]
+      (require nspace)
+      (start-plugin! (var-get (resolve plugin-symbol))))
+    
+    (catch Throwable t
+      (log-plugin-exception! plugin-symbol t))))
 

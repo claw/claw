@@ -3,51 +3,124 @@
 
 Note that configured references to other namespaces must be quoted so
 that they don't have to be already loaded when config.clj loads.
+
+You can set overrides in your ~/.lein/profiles.clj for development mode.
+
 "
   (:refer-clojure :exclude [get])
-  (:require [cheshire.core :as json])
+  (:require [cheshire.core :as json]
+            [clojure.tools.logging :as log]
+            [clansi.core :as ansi]
+            )
   (:use [environ.core]))
 
-;; Set overrides in your ~/.lein/profiles.clj for development mode.
 
-(def default-configuration
-  "This is the base configuration from which mode-specific configuration maps are derived.
-You may be more interested in mode-defaults, where many of these
-settings are overridden for e.g. dev mode.
+;; The current live configuration, without any env variable derived
+;; values.  Note that this means you CANNOT inspect this directly. Use
+;; (get) instead, so that env vars are taken into account.
+;;
+;; TODO: Demunge and merge env vars into this at startup, so this CAN be inspected directlya
+;;
+(defonce ^:dynamic *config* (atom {}))
+
+(defn add!
+  "Adds the given data, typically a map of configuration values, to
+  the current live *config*.
+
+  Keys should typically be ::keywords -- i.e. double-colon
+  auto-namespaced keywords. In this way, different plugins (and other
+  code) can use the same names for their configuration values. For
+  example, the nREPL and webserver plugins both have a value
+  called ::port, which is auto-resolved to the appropriate namespaces.
 "
+  [config-data]
+     (swap! *config* merge config-data))
+
+(defn get
+  "Returns the current configuration value for the given key. Key should generally be a lowercase symbol.
+
+*config* holds the runtime configuration in an atom which contains a
+maps. Keys should typically be double-colon namespace qualified ::keywords.
+
+Environment variables can be used to override the internal default
+config maps for runtime adjustment of all config values. (Env
+variables are better than external config files because you can deploy
+exactly the same codebase or jar in production, development, testing,
+etc. and drive its behavior in the startup scripts, rather than
+managing a zoo of overlapping config files in version control.)
+
+The env variable naming syntax is SOME_NAMESPACE__KEY_NAME. That is, all
+letters are uppercased, all dashes and periods are translated to
+underscores, and the namespace and config key are seperated by a double underscore.
+
+For example, to set the nREPL port to 12345, which is defined in
+the :port config key within the :claw.plugin.nrepl configspace, you
+can start Claw with
+
+     $ CLAW_PLUGINS_NREPL__PORT=12345 lein run
+
+Config tries to parse the env variable value as JSON and returns that
+to the Clojure code asking about that config key. If JSON parsing
+fails, a raw string is returned.
+
+Development config values can also be set in `~/.lein/profiles.clj`
+and `.lein-env` in the project directory (see
+https://github.com/weavejester/environ for examples.)
+
+If none of the above locations contains a value, the default config
+map for the current operating mode is consulted.
+
+If all of the above fail, the default provided is used.
+"
+  ([config-key] (get config-key nil))
+  ([config-key default]
+     ;; First try the env var TODO: implement demunging IMPORTANT
+     (or (if-let [val (env config-key)]
+               (try (json/parse-string val)
+                    (catch com.fasterxml.jackson.core.JsonParseException e val)))
+         ;; Nothing in the env, so try *config*
+         (let [config @*config*]
+           (if (contains? config config-key)
+             (config-key config)
+             ;; Nothing there either, so log an error and return the given default.
+             ;; TODO: log the calling line number
+             (do
+               (log/error (ansi/style (str " * Error: no value found for requested config value " config-key ) :bright :red))
+               default))))))
+
+(defn get-unquoted
+  "Uses config/get to get a sequence of symbolic name and unquotes them,
+  returning the sequence of concretized vars that results. It tries to
+  load any namespaces referenced.
+
+TODO: Throw better errors than the default here, to catch typos in the
+config. Give users a friendly error message suggesting that they check
+their config for typos, and make sure that all required files have been
+loaded.
+
+"
+  ([config-key]
+     (map (fn [sym]
+            (require (symbol (namespace sym)))
+            (var-get (find-var sym))) (claw.config/get config-key))))
+
+(defn dev-mode?
+  "Convenience method; returns true if in dev mode."
+  []
+  (get ::mode :claw.config))
+
+
+(def default-claw-configuration
+  "This is the base configuration for Claw itself."
   {
-   ;;;;;;;;;;;;;;;;;;;;;;;
-   ;;
-   ;; General settings
-   ;;
-   ;;;;;;;;;;;;;;;;;;;;;;;
-   :app-human-name "<Unnamed Claw App>" ;; Human-readable name of the application
+   ::mode "dev" ;; "dev" or "production"
+   
+   ::app-human-name "<Unnamed Claw App>" ;; Human-readable name of the application
 
    ;; Maven-*-name are used for auto-finding the app's version number (n.b. not Claw's version number, the app using Claw's version number.)
    ;; These are auto-set in the app-level config files generated by claw-template.
-   :maven-artifact-name nil
-   :maven-group-name nil
-
-   :nrepl-port "9999"
-
-   ;;;;;;;;;;;;;;;;;;;;;;;
-   ;;
-   ;; Database configuration
-   ;;
-   ;;;;;;;;;;;;;;;;;;;;;;;
-   :database-host "localhost"
-   :database-port "5432"
-
-   ;;;;;;;;;;;;;;;;;;;;;;;
-   ;;
-   ;; Web configuration
-   ;;
-   ;;;;;;;;;;;;;;;;;;;;;;;
-   :web-port "3000"
-   :global-middleware ['ring.middleware.logger/wrap-with-logger
-                       'ring.middleware.jsonp/wrap-json-with-padding
-                       ]
-   :middleware [] ;; Allows modes to add additional mode-specific middleware without overwriting the globals.
+   ::maven-artifact-name nil
+   ::maven-group-name nil
 
    ;;;;;;;;;;;;;;;;;;;;;;;
    ;;
@@ -61,93 +134,15 @@ settings are overridden for e.g. dev mode.
    ;; make a leaner app, just override this in your config, and only
    ;; include the plugins you need.
    ;;
-   :claw-internal-plugins ['claw.plugins.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
+   ::internal-plugins ['claw.plugins.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
                            'claw.plugins.nrepl/nrepl-plugin
                            'claw.plugins.webserver/webserver-plugin]
    
    ;;
-   ;; App-level user-provided plugins should be added to :claw-plugins.
+   ;; App-level user-provided plugins should be added to ::plugins.
    ;;
-   :claw-plugins '[] 
+   ::plugins '[] 
 
-   }
-  )
-
-(def mode-defaults
-  "Application default configurations by mode."
-  {
-
-   :dev (merge default-configuration
-               {
-                :mode "dev"
-                
-                :database-name "claw-development"
-                :database-user "claw-development"
-                :database-password ""
-                
-                :middleware ['ring.middleware.stacktrace/wrap-stacktrace-web
-                             'ring.middleware.reload/wrap-reload]
-                
-                })
-   
-   :production (merge default-configuration
-                      {
-                       :mode "production"
-                       :web-port "8080"
-                       
-                       :database-name "claw-production"   
-                       :database-user "claw-production"
-                       :database-password ""
-                       
-                       })
    })
 
-
-(def mode
-  "The application's run mode, which selects the default settings used.
-
-Valid values are \"production\" or \"dev\".
-Any unknown value is ignored and puts the app into dev mode.
-"
-  (case (env :mode)
-        "production" :production
-        "dev" :dev
-        :dev)) ;; TODO: log an error on unknown values
-
-(defn get
-  "Returns the current configuration value for the given key. Key should generally be a lowercase symbol.
-
-If an environment variable is set with the same name as the key,
-capitalized, config tries to parse it as JSON and returns that. If
-JSON parsing fails, a raw string is returned.
-
-Development config values can also be set in `~/.lein/profiles.clj`
-and `.lein-env` in the project directory (see
-https://github.com/weavejester/environ for examples.)
-
-If neither of the above locations contains a value, the default config map for the current operating mode is consulted.
-
-If all of the above fail, the default provided is used.
-"
-  ([key default] (or (get key) default))
-  ([key]
-     (or (if-let [val (env key)]
-           (try (json/parse-string val)
-                (catch com.fasterxml.jackson.core.JsonParseException e val)))
-         ((mode mode-defaults) key))))
-
-(defn get-unquoted
-  "Uses config/get to get a sequence of symbolic name and unquotes them,
-  returning the sequence of concretized vars that results. It tries to
-  load any namespaces referenced.
-
-TODO: Throw better errors than the default here, to catch typos in the
-config. Give users a friendly error message suggesting that they check
-their config for typos, and make sure that all required files have been
-loaded.
-
-"
-  [key]
-  (map (fn [sym]
-         (require (symbol (namespace sym)))
-         (var-get (find-var sym))) (claw.config/get key)))
+(add! default-claw-configuration)

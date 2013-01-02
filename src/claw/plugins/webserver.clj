@@ -23,6 +23,18 @@
    ))
 
 
+(config/add! {
+              ::port "3000"
+              ::global-middleware []
+              ::middleware [] ;; Allows modes to add additional mode-specific middleware without overwriting the globals.
+              })
+
+(if (config/dev-mode?)
+  (config/add! {:global-middleware ['ring.middleware.logger/wrap-with-logger
+                                    'ring.middleware.jsonp/wrap-json-with-padding
+                                    ]}))
+
+
 (def default-routes
   "Route to the default Claw root landing page and 404 page.
 
@@ -36,8 +48,8 @@ TODO: Prettier landing page and 404 page.
 
 (defn- default-middleware
   []
-  (concat (config/get-unquoted :global-middleware)
-          (config/get-unquoted :middleware)))
+  (concat (config/get-unquoted ::global-middleware)
+          (config/get-unquoted ::middleware)))
 
 (def handler
   "Ring handler stack for the app."
@@ -70,7 +82,7 @@ TODO: Option to automatically try different ports if this port is in use
       (.start server))
     (swap! webserver
            (fn [_]
-             (let [port (Integer. (config/get :web-port "3000"))]
+             (let [port (Integer. (config/get ::port "3000"))]
                (println (ansi/style (str "   - Starting webserver on port " port) :bright :green))
                (log/info (ansi/style (str " - Starting webserver on port " port) :bright :green))
                (new-web-server port))))))

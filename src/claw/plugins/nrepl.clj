@@ -7,6 +7,9 @@
    [clojure.tools.logging :as log]
    [clansi.core :as ansi]))
 
+
+(config/add! {::port "7888"}) ;; set default port
+
 (defonce nrepls (atom {}))
 
 (defn start-nrepl-server!
@@ -14,7 +17,7 @@
    Does nothing if there is already an nREPL running on that port."
   ([] (start-nrepl-server! nil))
   ([port]
-     (let [port (Integer. (or port (config/get :nrepl-port) "7888"))]
+     (let [port (Integer. (or port (config/get ::port) "7888"))]
        (if (contains? @nrepls port)
          (do
            (log/warn (ansi/style (str "nREPL: Tried to start an nREPL on port " port ", but there's already an nREPL running there. Refusing to run.")))
@@ -28,7 +31,7 @@
 
 TODO: This seems to be broken; the nrepl/stop-server call doesn't do anything."
   [port]
-  (let [port (Integer. (or port (config/get :nrepl-port) "7888"))]
+  (let [port (Integer. (or port (config/get ::port) "7888"))]
     (if-let [nrepl (get @nrepls port)]
       (do
         (log/info (str " * Shutting down nREPL server on port " port "."))
