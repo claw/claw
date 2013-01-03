@@ -45,4 +45,8 @@
         (log/info (ansi/style " -- Set :app-name, :maven-group-name, and :maven-artifact-name in your config to have your app name and version number autologged here." :yellow))))))
 
   
-(def logging-plugin (plugin/new-plugin! (constantly true) (fn [_] (start-logger!)) (constantly true)  (constantly true) "logger"))
+(def logging-plugin (plugin/new-plugin! (constantly :ready)
+                                        (fn [_] (start-logger!) :started)
+                                        (constantly :stopped)
+                                        (constantly :shutdown)
+                                        "logger"))

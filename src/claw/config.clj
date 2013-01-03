@@ -9,8 +9,7 @@ You can set overrides in your ~/.lein/profiles.clj for development mode.
 "
   (:refer-clojure :exclude [get])
   (:require [cheshire.core :as json]
-            [clojure.tools.logging :as log]
-            [clansi.core :as ansi]
+            [onelog.core :as log]
             )
   (:use [environ.core]))
 
@@ -35,6 +34,28 @@ You can set overrides in your ~/.lein/profiles.clj for development mode.
 "
   [config-data]
      (swap! *config* merge config-data))
+
+(defn- env-munge-name
+  "Takes a configuration keyword and munges it into an env variable name
+  keyword suitable for use with Environ according to the following rules:
+
+    1) All periods are converted to single dashes.
+    2) All slashes are converted to double dashes.
+    3) Colons are removed.
+
+ For example, :claw.config/foo becomes :claw-config--foo.
+
+Note that environ (the library) auto-uppercases names of env vars and
+translates dashes to underscores, so your overriding var in the actual
+environment will have to be named CLAW_CONFIG__FOO in this case.
+
+"
+  [config-key]
+  (keyword (-> 
+            (clojure.string/replace (str config-key) "." "-")
+            (clojure.string/replace ":" "")
+            (clojure.string/replace "/" "--"))))
+
 
 (defn get
   "Returns the current configuration value for the given key. Key should generally be a lowercase symbol.
@@ -71,11 +92,13 @@ If none of the above locations contains a value, the default config
 map for the current operating mode is consulted.
 
 If all of the above fail, the default provided is used.
+
+TODO: Facility for preloading a config file
 "
   ([config-key] (get config-key nil))
   ([config-key default]
-     ;; First try the env var TODO: implement demunging IMPORTANT
-     (or (if-let [val (env config-key)]
+     ;; First try the env var.
+     (or (if-let [val (env (env-munge-name config-key))]
                (try (json/parse-string val)
                     (catch com.fasterxml.jackson.core.JsonParseException e val)))
          ;; Nothing in the env, so try *config*
@@ -85,7 +108,7 @@ If all of the above fail, the default provided is used.
              ;; Nothing there either, so log an error and return the given default.
              ;; TODO: log the calling line number
              (do
-               (log/error (ansi/style (str " * Error: no value found for requested config value " config-key ) :bright :red))
+               (log/error (str " * Error: no value found for requested config value " config-key ))
                default))))))
 
 (defn get-unquoted
@@ -135,14 +158,17 @@ loaded.
    ;; include the plugins you need.
    ;;
    ::internal-plugins ['claw.plugins.logging/logging-plugin ;; logging-plugin should always be loaded first, so we can get failure logs for other plugins
-                           'claw.plugins.nrepl/nrepl-plugin
-                           'claw.plugins.webserver/webserver-plugin]
+                       'claw.plugins.nrepl/nrepl-plugin
+                       'claw.plugins.webserver/webserver-plugin
+                       'claw.plugins.dump-status/dump-status-plugin]
    
    ;;
    ;; App-level user-provided plugins should be added to ::plugins.
    ;;
    ::plugins '[] 
 
+   ::logfile "logs/claw.log"
+   ::loglevel "info"
    })
 
 (add! default-claw-configuration)

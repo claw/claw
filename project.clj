@@ -28,6 +28,7 @@
 
 
                  ;; General purpose utilities
+                 [onelog "0.2.0-SNAPSHOT"]
                  [clj-time "0.4.2"]
                  [org.clojure/core.memoize "0.5.1"] ;; Advanced memoization
                  [environ "0.3.0"] ;; read config from environment

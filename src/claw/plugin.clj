@@ -26,10 +26,15 @@
   claw.core provides an initial execution context and starts some
   configurable default plugins at startup. Additional context may be
   created by individual plugins at runtime.
-  
+
+TODO: Would it be better for plugins to manage their own state
+independently, in their own namespaces?
+
+TODO: add a \"fail on plugin failure\" mode that crashes the app if
+any plugin fails to load.
 "
   (:require [clansi.core :as ansi]
-            [clojure.tools.logging :as log])
+            [onelog.core :as log])
   (:refer-clojure :exclude [name]))
 
 
@@ -90,26 +95,26 @@
   (state [plugin] @state)
 
   (preload! [plugin args]
+    (log/debug "Preloading plugin '" name "' with args " args)
     (when (= @state :shutdown)
-      (pre-function args)
-      (swap! state (fn [_] :ready))))
+      (swap! state (pre-function args))))
 
   (start! [plugin args]
+    (log/debug "Starting plugin " name " with args " args)
     (preload! plugin nil);; call preload! yourself if it requires args. TODO: is there a better way?
-    (when (= @state :ready)
-      (start-function args)
-      (swap! state (fn [_] :running))))
+    (when (= @state :ready)      
+      (swap! state (start-function args))))
 
   (stop! [plugin args]
+    (log/debug "Stopping plugin " " with args " args)
     (when (= @state :running)
-      (stop-function args)
-      (swap! state (fn [_] :stopped))))
+      (swap! state (stop-function args))))
 
   (shutdown! [plugin args]
+    (log/debug "Shutting down plugin "  " with args " args)
     (stop! plugin nil)
-    (when (= @state :stopped)
-      (post-function args)
-      (swap! state (fn [_] :stopped)))))
+    (when (= @state :stopped)      
+      (swap! state (post-function args)))))
 
 
 
@@ -159,9 +164,21 @@ been loaded, to avoid causing Log4J to print warning spam about the
 logging system being unconfigured to the console.
 "
   [plugin-symbol]
-  (println  " * Loading plugin"  (ansi/style plugin-symbol :cyan :bright)  "...")
-  (if (find-ns 'claw.plugins.logging)
-    (log/info  " * Loading plugin"  (ansi/style plugin-symbol :cyan :bright)  "...")))
+  (binding [onelog.core/*copy-to-console* true]
+    (log/info  " * Loading plugin "  (ansi/style plugin-symbol :cyan :bright)  "...")))
+
+(defn- log-plugin-error!
+  "Logs an info message noting that the specified plugin has been
+loaded, and prints a similar message to the console, to aid debugging
+in cases where the logging plugin itself hasn't loaded yet.
+
+ Will not try to log anything unless the claw.logging namespace has
+been loaded, to avoid causing Log4J to print warning spam about the
+logging system being unconfigured to the console.
+"
+  [& args]
+  (binding [onelog.core/*copy-to-console* true]
+    (log/error (apply str "Error loading plugin: " args))))
 
 (defn- log-plugin-exception!
   "Logs an exception that occurred loading a plugin according to the
@@ -169,9 +186,9 @@ logging system being unconfigured to the console.
 
 TODO: print / log stack traces"
   [plugin-symbol exception]
-  (println   (ansi/style (str "  -- Error loading plugin " plugin-symbol ": " (.getMessage exception)) :red :bright))
-  (if (find-ns 'claw.plugins.logging)
-    (log/error   (ansi/style (str "  -- Error loading plugin " plugin-symbol ": " (.getMessage exception)) :red :bright))))
+  (binding [onelog.core/*copy-to-console* true]
+    (log/error (str "  -- Error loading plugin " plugin-symbol ": "))
+    (log/error (log/throwable exception))))
 
 (defn start-plugin-by-symbol!
   "Loads the given symbol's namespace and then starts the plugin, logging any errors."
@@ -182,6 +199,10 @@ TODO: print / log stack traces"
       (require nspace)
       (start-plugin! (var-get (resolve plugin-symbol))))
     
+    ;; TODO: There could be other NullPointerExceptions that aren't related to not being able to find the plugin.
+    ;; Detect the difference and log appropriately.
+    (catch NullPointerException t 
+      (log-plugin-error! "Couldn't find requested plugin " plugin-symbol ))
     (catch Throwable t
       (log-plugin-exception! plugin-symbol t))))
 

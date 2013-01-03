@@ -99,4 +99,8 @@ TODO: Option to automatically try different ports if this port is in use
        (log/warn (ansi/style " - stop-server!: Asked to shut down default webserver, but no server is running." :bright :yellow)))))
 
 
-(def webserver-plugin (plugin/new-plugin! (constantly true) (fn [_] (start-server!)) (fn [_] (stop-server!))  (constantly true) "webserver"))
+(def webserver-plugin (plugin/new-plugin! (constantly :ready)
+                                          (fn [_] (start-server!) :ready)
+                                          (fn [_] (stop-server!) :stopped)
+                                          (constantly :shutdown)
+                                          "webserver"))

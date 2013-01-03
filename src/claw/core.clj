@@ -2,7 +2,7 @@
   (:require [claw.config :as config]
             [clansi.core :as ansi]
             [claw.plugin]
-            [clojure.tools.logging :as log]))
+            [onelog.core :as log]))
 
 (defn- start-plugin!
   "Loads the given plugin's namespace with require, and starts the
@@ -30,12 +30,20 @@ TODO: add a \"die on exception\" option that halts and exits rather than continu
   "Main framework entry point."
   [& args]
 
-  (println (ansi/style (str "Claw v" (System/getProperty "claw.version") " starting up...") :white :bright) "\n"
-           "Claw is copyright (C) 2012 Paul Legato. Distributed under the Eclipse Public License.\n")
+  (log/set-default-logger! (config/get :claw.config/logfile) (keyword (config/get :claw.config/loglevel)))
+  
+  (log/with-console-log
+    (log/info (ansi/style (str "Claw v" (System/getProperty "claw.version") " starting up...") :white :bright) "\n"
+              "Claw is copyright (C) 2012 Paul Legato. Distributed under the Eclipse Public License.\n"))
+
+  (log/debug (ansi/style "Debug log enabled" :bright :magenta)) ;; Won't do anything if it's not
   
   (start-all-plugins!)
-  
-  (println
-   "\nStartup complete!\n"
-    (ansi/style (str "See logs/ring.log for further messages.") :yellow :bright)))
+
+  (print "\n")
+  (log/with-console-log
+    (log/info
+     "Startup complete!\n"))
+  (println (ansi/style (str "See " (config/get :claw.config/logfile) " for further messages.") :yellow :bright)))
+
 

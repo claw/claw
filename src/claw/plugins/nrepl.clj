@@ -41,4 +41,8 @@ TODO: This seems to be broken; the nrepl/stop-server call doesn't do anything."
         (log/warn (ansi/style (str "nREPL: asked to stop an nREPL on port " port ", but there does not seem to be any nREPL running there.")))
         nil))))
 
-(def nrepl-plugin (plugin/new-plugin! (constantly true) start-nrepl-server! stop-nrepl-server! (constantly true) "nrepl"))
+(def nrepl-plugin (plugin/new-plugin! (constantly :ready)
+                                      (fn [_] (start-nrepl-server!) :started)
+                                      (fn [_] (stop-nrepl-server!) :stopped)
+                                      (constantly :shutdown)
+                                      "nrepl"))
