@@ -23,7 +23,7 @@
            (log/warn (ansi/style (str "nREPL: Tried to start an nREPL on port " port ", but there's already an nREPL running there. Refusing to run.")))
            nil)
          (do
-           (log/info (str "* Starting nREPL server on port " port "."))
+           (log/info (ansi/style (str "* Starting nREPL server on port " port ".") :green))
            (swap! nrepls assoc port (nrepl/start-server :port port)))))))
 
 (defn stop-nrepl-server!
@@ -42,7 +42,13 @@ TODO: This seems to be broken; the nrepl/stop-server call doesn't do anything."
         nil))))
 
 (def nrepl-plugin (plugin/new-plugin! (constantly :ready)
-                                      (fn [_] (start-nrepl-server!) :started)
-                                      (fn [_] (stop-nrepl-server!) :stopped)
+                                      (fn [_]
+                                        (if (start-nrepl-server!)
+                                          :started
+                                          :error))
+                                      (fn [_]
+                                        (if (stop-nrepl-server!)
+                                          :stopped
+                                          :error))
                                       (constantly :shutdown)
                                       "nrepl"))

@@ -48,6 +48,7 @@ any plugin fails to load.
 ;;  - :stopped - stop-function has been run, the plugin is not operational,
 ;;                but post-function has not been run. The plugin may be restarted
 ;;                without re-running pre-function.
+;;  - :error - Generic fatal error. TODO: add recoverable errors?
 ;;
 ;; TODO: Maybe keep track of what protocols each plugin requires and
 ;; provides... automatic dependency resolution? Or is this just
@@ -73,21 +74,20 @@ any plugin fails to load.
 
   
   (start! [plugin args]
-    "Starts the plugin, running any necessary pre-function exactly
-    once (no matter how many times the plugin is started.) Should
-    update state as appropriate.")
+    "Starts the plugin with start-function if it's :ready. Should update state as appropriate.")
 
   (stop! [plugin args]
-    "Stops the plugin with stop-function. Should update state as
-     appropriate. Does NOT call post-function.")
+    "Stops the plugin with stop-function if it's :running. Should update state as
+     appropriate.")
 
   (shutdown! [plugin args]
-    "Returns to :shutdown state, stopping the plugin and running any
+    "Returns to :shutdown state if it's :stopped, stopping the plugin and running any
      post-function (once) if necessary. Should update state as
      appropriate.")  )
 
 ;; Global plugin registry
 (defonce plugins (atom {}))
+
 
 (defrecord InternalPlugin [name pre-function start-function stop-function post-function state]
   Plugin
@@ -95,26 +95,30 @@ any plugin fails to load.
   (state [plugin] @state)
 
   (preload! [plugin args]
-    (log/debug "Preloading plugin '" name "' with args " args)
-    (when (= @state :shutdown)
-      (swap! state (pre-function args))))
+    (log/debug (str "    -- Preloading plugin '" name "' with args: " args " in state: " @state))
+    (if (= @state :shutdown)
+      (swap! state (constantly (pre-function args))) ;; Because pre-function may have side effects.
+      (log/warn "preload! called on plugin '" name "' when in state " @state ". Plugin needs to be in :shutdown state to call preload!.")))
 
   (start! [plugin args]
-    (log/debug "Starting plugin " name " with args " args)
-    (preload! plugin nil);; call preload! yourself if it requires args. TODO: is there a better way?
-    (when (= @state :ready)      
-      (swap! state (start-function args))))
+    (log/debug (str "    -- Starting plugin '" name "' with args: " args  " in state: " @state))
+
+    (if (= @state :ready)      
+      (swap! state (constantly (start-function args)))
+      (log/warn "start! called on plugin '" name "' when in state " @state ". Plugin needs to be in :ready state to call start!.")))
 
   (stop! [plugin args]
-    (log/debug "Stopping plugin " " with args " args)
-    (when (= @state :running)
-      (swap! state (stop-function args))))
+    (log/debug (str "    -- Stopping plugin '" name "' with args: " args  " in state: " @state))
+    (if (= @state :running)
+      (swap! state (constantly (stop-function args)))
+      (log/warn "stop! called on plugin '" name "' when in state " @state ". Plugin needs to be in :running state to call stop!.")))
 
   (shutdown! [plugin args]
-    (log/debug "Shutting down plugin "  " with args " args)
+    (log/debug (str "    -- Shutting down plugin '" name "' with args: " args  " in state: " @state))
     (stop! plugin nil)
-    (when (= @state :stopped)      
-      (swap! state (post-function args)))))
+    (if (= @state :stopped)      
+      (swap! state (constantly (post-function args)))
+      (log/warn "shutdown! called on plugin '" name "' when in state " @state ". Plugin needs to be in :stopped state to call shutdown!."))))
 
 
 
@@ -206,3 +210,13 @@ TODO: print / log stack traces"
     (catch Throwable t
       (log-plugin-exception! plugin-symbol t))))
 
+
+(defn start-plugins!
+  "Given a list of namespace-qualified symbols, requires all namespaces and loads the specified plugins.
+
+TODO: add a \"die on exception\" option that halts and exits rather than continuing with startup.
+"
+  [plugins]
+  (dorun (map
+          (fn [plugin-symbol] (claw.plugin/start-plugin-by-symbol! plugin-symbol))
+          plugins)))
