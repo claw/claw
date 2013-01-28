@@ -11,7 +11,7 @@
                  ;; using.
                  
                  ;; Ring extensions
-                 [ring.middleware.logger "0.4.0-SNAPSHOT"]
+                 [ring.middleware.logger "0.4.0"]
                  [org.clojars.pepijndevos/ring-http-basic-auth "0.1.1"]
                  [ring.middleware.jsonp "0.1.1"] ;; auto-generate JSONP from any JSON response
                  [com.cemerick/friend "0.1.2"] ;; Authentication
@@ -28,7 +28,7 @@
 
 
                  ;; General purpose utilities
-                 [onelog "0.4.2-SNAPSHOT"]
+                 [onelog "0.4.2"]
                  [clj-time "0.4.2"]
                  [org.clojure/core.memoize "0.5.1"] ;; Advanced memoization
                  [environ "0.3.0"] ;; read config from environment
