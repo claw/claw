@@ -1,4 +1,4 @@
-(defproject claw "0.3.0"
+(defproject claw "0.4.0"
   :description "Claw is a full stack, monolithic web framework for Clojure."
   :url "http://github.com/pjlegato/claw"
   :license {:name "Eclipse Public License"
@@ -11,7 +11,7 @@
                  ;; using.
                  
                  ;; Ring extensions
-                 [ring.middleware.logger "0.2.3-SNAPSHOT"]
+                 [ring.middleware.logger "0.4.0"]
                  [org.clojars.pepijndevos/ring-http-basic-auth "0.1.1"]
                  [ring.middleware.jsonp "0.1.1"] ;; auto-generate JSONP from any JSON response
                  [com.cemerick/friend "0.1.2"] ;; Authentication
@@ -28,7 +28,7 @@
 
 
                  ;; General purpose utilities
-                 [onelog "0.4.1-SNAPSHOT"]
+                 [onelog "0.4.2"]
                  [clj-time "0.4.2"]
                  [org.clojure/core.memoize "0.5.1"] ;; Advanced memoization
                  [environ "0.3.0"] ;; read config from environment
