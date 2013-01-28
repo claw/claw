@@ -25,15 +25,11 @@
 
 (config/add! {
               ::port "3000"
-              ::global-middleware []
+              ::global-middleware ['ring.middleware.logger/wrap-with-logger
+                                    'ring.middleware.jsonp/wrap-json-with-padding]
               ::middleware [] ;; Allows modes to add additional mode-specific middleware without overwriting the globals.
+              ;; TODO: ::auto-port-fallback true ;; Try to auto-select another port if ::port is not available?
               })
-
-(if (config/dev-mode?)
-  (config/add! {:global-middleware ['ring.middleware.logger/wrap-with-logger
-                                    'ring.middleware.jsonp/wrap-json-with-padding
-                                    ]}))
-
 
 (def default-routes
   "Route to the default Claw root landing page and 404 page.
