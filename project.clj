@@ -1,4 +1,4 @@
-(defproject claw "0.2.0-SNAPSHOT"
+(defproject claw "0.3.0-SNAPSHOT"
   :description "Claw is a full stack, monolithic web framework for Clojure."
   :url "http://github.com/pjlegato/claw"
   :license {:name "Eclipse Public License"
@@ -28,6 +28,7 @@
 
 
                  ;; General purpose utilities
+                 [onelog "0.4.1-SNAPSHOT"]
                  [clj-time "0.4.2"]
                  [org.clojure/core.memoize "0.5.1"] ;; Advanced memoization
                  [environ "0.3.0"] ;; read config from environment

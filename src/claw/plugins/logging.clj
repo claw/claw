@@ -3,7 +3,7 @@
   (:require
    [claw.config :as config]
    [claw.plugin :as plugin]
-   [clojure.tools.logging :as log]
+   [onelog.core :as log]
    [clansi.core :as ansi]
    [trptcolin.versioneer.core :as versioneer]
    [ring.middleware.logger :as logger]))
@@ -21,8 +21,9 @@
 (defn start-logger!
   "Sets up default app-wide logging."
   []
-  (logger/set-default-logger!)
-  (logger/set-default-root-logger!) ;; Set the entire app to log to the same Ring middleware log
+;  (logger/set-default-logger!)
+;  (logger/set-default-root-logger!) ;; Set the entire app to log to the same Ring middleware log
+  (log/set-default-logger! (config/get :claw.config/logfile) (keyword (config/get :claw.config/loglevel)))
 
   (log-uncaught-exceptions!)
   ;;(log/log-capture! (str *ns*)) ;; capture stdout / stderr to log to current namespace
@@ -45,4 +46,8 @@
         (log/info (ansi/style " -- Set :app-name, :maven-group-name, and :maven-artifact-name in your config to have your app name and version number autologged here." :yellow))))))
 
   
-(def logging-plugin (plugin/new-plugin! (constantly true) (fn [_] (start-logger!)) (constantly true)  (constantly true) "logger"))
+(def logging-plugin (plugin/new-plugin! (constantly :ready)
+                                        (fn [_] (start-logger!) :started)
+                                        (constantly :stopped)
+                                        (constantly :shutdown)
+                                        "logger"))
