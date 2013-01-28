@@ -1,10 +1,15 @@
-(defproject claw "0.1.0-SNAPSHOT"
+(defproject claw "0.3.0"
   :description "Claw is a full stack, monolithic web framework for Clojure."
   :url "http://github.com/pjlegato/claw"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
 
+                 ;; TODO: Break out plugins into subprojects, so that
+                 ;; you don't need to have dependencies around that
+                 ;; are only needed for plugins you aren't actually
+                 ;; using.
+                 
                  ;; Ring extensions
                  [ring.middleware.logger "0.2.3-SNAPSHOT"]
                  [org.clojars.pepijndevos/ring-http-basic-auth "0.1.1"]
@@ -15,10 +20,15 @@
                  [korma "0.3.0-beta9"]
                  [postgresql "9.1-901.jdbc4"]
 
-                 ;; Noir web framework
-                 [noir "1.3.0-beta10"]
+                 ;; Web
+                 [ring "1.1.6"]
+                 [compojure "1.1.3"]  ;; Routes
+                 [ring-serve "0.1.2"] ;; Easily start and stop the webserver
+                 [hiccup "1.0.2"]     ;; Render HTML from Clojure
+
 
                  ;; General purpose utilities
+                 [onelog "0.4.1-SNAPSHOT"]
                  [clj-time "0.4.2"]
                  [org.clojure/core.memoize "0.5.1"] ;; Advanced memoization
                  [environ "0.3.0"] ;; read config from environment
@@ -26,8 +36,8 @@
                  [fs "1.0.0"] ;; Filesystem utils
                  [slingshot "0.10.2"] ;; Enhanced throw/catch
                  [org.clojure/tools.nrepl "0.2.0-beta8"] ;; Network REPL
-                 [trptcolin/versioneer "0.1.0"] ;; Reads versions from Maven / system properties
-                 
-
+                 [trptcolin/versioneer "0.1.0"] ;; Reads versions from Maven / system properties                 
+                 [cheshire "5.0.0"] ;; JSON
                  ]
+  :main claw.core
   )
