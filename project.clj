@@ -1,4 +1,4 @@
-(defproject claw "0.3.0-SNAPSHOT"
+(defproject claw "0.3.0"
   :description "Claw is a full stack, monolithic web framework for Clojure."
   :url "http://github.com/pjlegato/claw"
   :license {:name "Eclipse Public License"
