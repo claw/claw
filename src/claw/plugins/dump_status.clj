@@ -10,7 +10,7 @@
                                             (fn [_]
                                               (log/info (ansi/style "* Current configuration: " :bright :magenta))
                                               (doall (map #(log/info (let [cfg (config/get %)]
-                                                                       (str "  " (ansi/style % :white) " : '" cfg "' (" (class cfg) ")" ))) (keys @config/*config*)))
+                                                                       (str "  " (ansi/style % :yellow) " : '" cfg "' (" (class cfg) ")" ))) (keys @config/*config*)))
                                               :shutdown) ;; stateless one-off, short circuits back to :shutdown state
                                             (constantly :stopped)
                                             (constantly :shutdown)

@@ -16,20 +16,17 @@
   "Main framework entry point."
   [& args]
 
-  (log/set-default-logger! (config/get :claw.config/logfile) (keyword (config/get :claw.config/loglevel)))
+  (log/start! (config/get :claw.config/logfile) (keyword (config/get :claw.config/loglevel)))
   
-  (log/with-console-log
-    (log/info (ansi/style (str "Claw v" (System/getProperty "claw.version") " starting up...") :white :bright) "\n"
-              "Claw is copyright (C) 2012 Paul Legato. Distributed under the Eclipse Public License.\n"))
+  (log/info+ (ansi/style (str "Claw v" (System/getProperty "claw.version") " starting up...") :white :bright) "\n"
+             "Claw is copyright (C) 2012 Paul Legato. Distributed under the Eclipse Public License.\n")
 
-  (log/debug (ansi/style "Debug log enabled" :bright :magenta)) ;; Won't do anything if it's not
+  (log/debug+ (ansi/style "Debug log enabled" :bright :magenta)) ;; Won't do anything if it's not
   
   (start-all-plugins!)
 
   (print "\n")
-  (log/with-console-log
-    (log/info
-     "Startup complete!\n"))
+  (log/info+ "Startup complete!\n")
   (println (ansi/style (str "See " (config/get :claw.config/logfile) " for further messages.") :yellow :bright)))
 
 

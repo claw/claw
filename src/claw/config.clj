@@ -2,9 +2,24 @@
   "Global Claw app config.
 
 Note that configured references to other namespaces must be quoted so
-that they don't have to be already loaded when config.clj loads.
+that the namespace don't have to be already loaded when config.clj loads.
 
 You can set overrides in your ~/.lein/profiles.clj for development mode.
+
+You can override any config values with environment variables. The
+environment variable should be named as THE_NAMESPACE__FOO, where
+THE_NAMESPACE corresponds to a Clojure namespace called the.namespace,
+and FOO corresponds to the config key ::foo in that namespace. For
+example, to override the default nREPL port, you could set the
+environment variable CLAW_PLUGINS_NREPL__PORT=7898. (See the docstring
+on env-munge-name for a longer explanation of how to map config keys
+to env variables.)
+
+TODO: Add docstring support for config items. Config keys are
+currently keywords, which do not accept metadata. Perhaps there can be
+convenience functions for adding default config values to *config* and
+maintaining a parallel data structure that provides documentation for
+each item.
 
 "
   (:refer-clojure :exclude [get])
