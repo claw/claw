@@ -1,6 +1,6 @@
-(defproject claw "0.4.0"
+(defproject org.claw/claw "0.4.0"
   :description "Claw is a full stack, monolithic web framework for Clojure."
-  :url "http://github.com/pjlegato/claw"
+  :url "http://github.com/claw/claw"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
